@@ -1,0 +1,126 @@
+#FROM nvidia/cuda:11.0-devel-ubuntu18.04
+FROM nvidia/cuda:11.0-cudnn8-devel-ubuntu18.04
+
+LABEL rin ueno <rin.ueno@cpc.ait.kyushu-u.ac.jp>
+
+#ubuntu 18.04 ...git
+ENV DEBIAN_FRONTEND=noninteractive
+
+# OpenCV version select
+#ARG OPENCV_VERSION="3.4.11"
+ARG OPENCV_VERSION="4.2.0"
+ARG BUILD_DIR=/opt
+
+# Base tool chain
+RUN apt-get update && \
+        apt-get install -y \
+        build-essential \
+        git \
+        wget \
+        unzip \
+        yasm \
+        pkg-config \
+        libcurl4-openssl-dev \
+        zlib1g-dev \
+        nano \
+        g++ \
+        gcc \
+        vim \
+        cmake \
+    && rm -rf /var/lib/apt/lists/*        
+
+RUN echo "Base tool chain"
+
+# install OpenCV library
+RUN apt-get update && \
+        apt-get install -y \
+        ffmpeg \
+        libpq-dev \
+        libtiff5-dev \
+        libavutil-dev \
+        libgtk2.0-dev \
+        # https://github.com/mdegans/nano_build_opencv
+        gfortran \
+        libatlas-base-dev \
+        libavcodec-dev \
+        libavformat-dev \
+        libavresample-dev \
+        libcanberra-gtk3-module \
+        libdc1394-22-dev \
+        libeigen3-dev \
+        libglew-dev \
+        libgstreamer-plugins-base1.0-dev \
+        libgstreamer-plugins-good1.0-dev \
+        libgstreamer1.0-dev \
+        libgtk-3-dev \
+        libjpeg-dev \
+        libjpeg8-dev \
+        libjpeg-turbo8-dev \
+        liblapack-dev \
+        liblapacke-dev \
+        libopenblas-dev \
+        libpng-dev \
+        libpostproc-dev \
+        libswscale-dev \
+        libtbb-dev \
+        libtbb2 \
+        libtesseract-dev \
+        libtiff-dev \
+        libv4l-dev \
+        libxine2-dev \
+        libxvidcore-dev \
+        libhdf5-dev \
+        libx264-dev \
+        #Python
+        python-dev \
+        python-numpy \
+        python3-tk \
+        python3-dev \
+        python3-numpy \
+        python3-matplotlib \
+        #V4L2
+        qv4l2 \ 
+        v4l-utils \
+        v4l2ucp \
+    && rm -rf /var/lib/apt/lists/*        
+
+RUN echo "library install is ok."
+
+WORKDIR ${BUILD_DIR}
+
+#COPY cmake.sh /opt
+
+# OpenCV install & CMake build
+RUN wget -O opencv.zip https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
+    unzip opencv.zip && rm opencv.zip && \
+    cd opencv-${OPENCV_VERSION} && \
+    wget -O opencv_contrib.zip https://github.com/opencv/opencv_contrib/archive/${OPENCV_VERSION}.zip && \
+    unzip opencv_contrib.zip && rm opencv_contrib.zip && \
+    pwd && \
+    ls -lat && \
+    mkdir ${BUILD_DIR}/opencv-${OPENCV_VERSION}/build && \
+    cd ${BUILD_DIR}/opencv-${OPENCV_VERSION}/build && \
+    cmake \
+    -D CMAKE_BUILD_TYPE=RELEASE \
+    -D CMAKE_INSTALL_PREFIX=/usr/local \
+    -D OPENCV_GENERATE_PKGCONFIG=ON \
+    -D ENABLE_NEON=ON \
+    -D WITH_TBB=ON \
+    -D WITH_V4L=ON \
+    -D WITH_GSTREAMER=ON \
+    -D WITH_FFMPEG=ON \
+    -D WITH_QT=OFF \
+    -D WITH_GTK=ON \
+    -D WITH_GTK3=ON \
+    -D WITH_CUDA=ON \
+    -D OPENCV_EXTRA_MODULES_PATH=/opt/opencv-${OPENCV_VERSION}/opencv_contrib-${OPENCV_VERSION}/modules \
+    -DBUILD_opencv_world=OFF \
+    .. 2>&1 | tee -a config.log 
+    # make  command
+    ##export NUMPROC=$(nproc --all) && \
+    ##make -j${NUMPROC} && \
+    ##make install  
+
+
+
+
