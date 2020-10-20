@@ -21,6 +21,7 @@ cmake \
         -DWITH_TBB=ON \
         -DWITH_V4L=ON \
         -DWITH_FFMPEG=ON \
+        -DWITH_GTK=ON \
         .. 2>&1 | tee -a config.log
 
 
