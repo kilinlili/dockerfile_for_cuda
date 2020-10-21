@@ -19,7 +19,7 @@ for i in range (NUM_REPEAT):
 time_end = time.time()
 
 print ("CPU = {0}".format((time_end - time_start) * 1000 / NUM_REPEAT) + "[msec]")
-#cv2.imshow('CPU', img_dst)
+cv2.imshow('CPU', img_dst)
 
 
 ### Run with GPU
